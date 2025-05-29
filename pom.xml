@@ -13,6 +13,7 @@
         <module>domain</module>
         <module>engine</module>
         <module>api</module>
+        <module>infra</module>
     </modules>
 
     <properties>
@@ -31,6 +32,31 @@
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
+
+            <dependency>
+                <groupId>org.projectlombok</groupId>
+                <artifactId>lombok</artifactId>
+                <version>1.18.30</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.kira</groupId>
+                <artifactId>domain</artifactId>
+                <version>1.0.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.kira</groupId>
+                <artifactId>engine</artifactId>
+                <version>1.0.0</version>
+            </dependency>
+
+            <dependency>
+                <groupId>com.kira</groupId>
+                <artifactId>infra</artifactId>
+                <version>1.0.0</version>
+            </dependency>
+
         </dependencies>
     </dependencyManagement>
 

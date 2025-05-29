@@ -9,24 +9,25 @@
         <version>1.0.0</version>
     </parent>
 
-    <artifactId>api</artifactId>
+    <artifactId>infra</artifactId>
 
     <dependencies>
         <dependency>
             <groupId>com.kira</groupId>
-            <artifactId>infra</artifactId>
+            <artifactId>engine</artifactId>
         </dependency>
 
-        <!-- Spring Web để expose REST API -->
+        <!-- Spring Data JPA -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-web</artifactId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
-        <!-- Engine để gọi apply() -->
+        <!-- MariaDB JDBC driver -->
         <dependency>
-            <groupId>com.kira</groupId>
-            <artifactId>engine</artifactId>
+            <groupId>org.mariadb.jdbc</groupId>
+            <artifactId>mariadb-java-client</artifactId>
+            <version>3.3.2</version>
         </dependency>
 
         <!-- Lombok -->

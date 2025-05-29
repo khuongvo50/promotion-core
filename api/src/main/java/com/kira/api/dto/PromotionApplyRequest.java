@@ -1,14 +1,22 @@
 package com.kira.api.dto;
 
-import com.kira.domain.CartItem;
+import lombok.Data;
 
 import java.math.BigDecimal;
 import java.util.List;
 
-public record PromotionApplyRequest(
-        String customerId,
-        BigDecimal totalAmount,
-        BigDecimal shippingFee,
-        int availablePoints,
-        List<CartItem> items
-) {}
+@Data
+public class PromotionApplyRequest {
+    private long customerId;
+    private BigDecimal totalAmount;
+    private BigDecimal shippingFee;
+    private int availablePoints;
+    private List<ItemDTO> items;
+
+    @Data
+    public static class ItemDTO {
+        private long itemId;
+        private int quantity;
+        private BigDecimal price;
+    }
+}

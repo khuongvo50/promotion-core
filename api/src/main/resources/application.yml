@@ -1,9 +1,9 @@
 spring:
   datasource:
-    #    url: jdbc:mariadb://localhost:3306/promotion_db
-    url: jdbc:mariadb://192.168.100.4:5306/promotion_core
-    username: root
-    password: slsZ1XmB
+    # url: jdbc:mariadb://localhost:3306/promotion_core
+    # url: jdbc:mariadb://192.168.100.4:5306/promotion_core
+    username: khuong.vo
+    password: qYizZNpYBawYQwK[
     driver-class-name: org.mariadb.jdbc.Driver
 
   jpa:

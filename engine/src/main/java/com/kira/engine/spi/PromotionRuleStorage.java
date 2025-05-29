@@ -1,6 +1,6 @@
 package com.kira.engine.spi;
 
-import com.kira.domain.PromotionRule;
+import com.kira.domain.model.PromotionRule;
 
 import java.util.List;
 import java.util.Optional;

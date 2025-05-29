@@ -1,7 +1,9 @@
 package com.kira.api.controller;
 
 import com.kira.api.dto.PromotionApplyRequest;
-import com.kira.domain.PromotionContext;
+import com.kira.domain.context.Item;
+import com.kira.domain.context.PromotionContext;
+import com.kira.domain.model.PromotionRule;
 import com.kira.domain.result.PromotionResult;
 import com.kira.engine.core.PromotionEngine;
 import com.kira.engine.spi.PromotionRuleStorage;
@@ -20,17 +22,24 @@ public class PromotionController {
 
     @PostMapping("/apply")
     public PromotionResult applyPromotion(@RequestBody PromotionApplyRequest request) {
-        PromotionContext context = new PromotionContext(
-                request.customerId(),
-                request.totalAmount(),
-                request.shippingFee(),
-                request.availablePoints(),
-                request.items()
+        PromotionContext context = new PromotionContext();
+        context.setCustomerId(request.getCustomerId());
+        context.setTotalAmount(request.getTotalAmount());
+        context.setShippingFee(request.getShippingFee());
+        context.setAvailablePoints(request.getAvailablePoints());
+
+        context.setItems(
+                request.getItems().stream()
+                        .map(i -> {
+                            var item = new Item();
+                            item.setItemId(i.getItemId());
+                            item.setQuantity(i.getQuantity());
+                            item.setPrice(i.getPrice());
+                            return item;
+                        }).toList()
         );
 
-        // Lấy tất cả rule (hoặc sau này có filter active, channel...)
-        List<com.kira.domain.PromotionRule> rules = promotionRuleStorage.findActiveRules();
-
-        return promotionEngine.apply(context, rules);
+        List<PromotionRule> rules = promotionRuleStorage.findActiveRules();
+        return promotionEngine.evaluate(context, rules);
     }
 }

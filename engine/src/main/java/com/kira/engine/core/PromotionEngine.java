@@ -3,15 +3,13 @@ package com.kira.engine.core;
 import com.kira.domain.context.PromotionContext;
 import com.kira.domain.model.PromotionAction;
 import com.kira.domain.model.PromotionRule;
-import com.kira.domain.model.enums.BenefitCategory;
+import com.kira.domain.model.enums.PromotionTarget;
 import com.kira.domain.result.AppliedPromotionResult;
 import com.kira.domain.result.PromotionResult;
 import com.kira.domain.result.RuleResultPair;
 import com.kira.domain.result.enums.RuleApplyStatus;
 import com.kira.engine.handler.PromotionRuleHandler;
 import com.kira.engine.handler.PromotionRuleHandlerFactory;
-import com.kira.engine.helper.BenefitCategoryHelper;
-import com.kira.engine.resolver.MaxCashDiscountResolver;
 import com.kira.engine.resolver.PromotionConflictResolver;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.expression.ExpressionParser;
@@ -21,6 +19,7 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class PromotionEngine {
@@ -67,15 +66,28 @@ public class PromotionEngine {
             }
         }
 
-        Map<BenefitCategory, List<AppliedPromotionResult>> grouped = BenefitCategoryHelper.groupByCategory(appliedResults);
+        Map<PromotionTarget, List<AppliedPromotionResult>> grouped =
+                appliedResults.stream()
+                        .collect(Collectors.groupingBy(AppliedPromotionResult::getTarget));
 
-        List<AppliedPromotionResult> discountGroup = grouped.getOrDefault(BenefitCategory.DISCOUNT, List.of());
-        List<Long> bestDiscountRuleIds = discountResolver.resolveBestRuleIds(discountGroup);
+        Map<PromotionTarget, List<Long>> bestRuleIdMap = grouped.entrySet().stream()
+                .filter(entry -> shouldResolveBest(entry.getKey()))
+                .collect(Collectors.toMap(
+                        Map.Entry::getKey,
+                        entry -> discountResolver.resolveBestRuleIds(entry.getValue())
+                ));
 
         return PromotionResult.builder()
-                .groupedResults(grouped)
-                .bestDiscountRuleIds(bestDiscountRuleIds)
+                .appliedResults(appliedResults)
                 .debugResults(debugResults)
+                .bestRuleIdMap(bestRuleIdMap)
                 .build();
+    }
+
+    private boolean shouldResolveBest(PromotionTarget target) {
+        return switch (target) {
+            case ORDER_TOTAL, SHIPPING_FEE, ITEM -> true;
+            default -> false;
+        };
     }
 }

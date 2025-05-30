@@ -5,7 +5,7 @@ import com.kira.api.dto.PromotionSuggestionDTO;
 import com.kira.domain.context.Item;
 import com.kira.domain.context.PromotionContext;
 import com.kira.domain.model.PromotionRule;
-import com.kira.domain.model.enums.BenefitCategory;
+import com.kira.domain.model.enums.PromotionTarget;
 import com.kira.domain.result.AppliedPromotionResult;
 import com.kira.domain.result.PromotionResult;
 import com.kira.engine.core.PromotionEngine;
@@ -27,23 +27,28 @@ public class PromotionController {
     private final PromotionRuleStorage promotionRuleStorage;
 
     @PostMapping("/evaluate")
-    public Map<String, Object> evaluate(@RequestBody PromotionEvaluateRequest request) {
-        PromotionContext context = this.fromEvaluateRequest(request);
-        // Load rule từ DB hoặc mock
+    public Map<String, List<PromotionSuggestionDTO>> evaluate(@RequestBody PromotionEvaluateRequest request) {
+        PromotionContext context = fromEvaluateRequest(request);
         List<PromotionRule> rules = promotionRuleStorage.findActiveRules();
 
         PromotionResult result = promotionEngine.evaluate(context, rules);
-        Map<BenefitCategory, List<AppliedPromotionResult>> grouped = result.getGroupedResults();
 
-        Map<String, Object> response = new LinkedHashMap<>();
+        // Map target → best ruleId list
+        Map<PromotionTarget, List<Long>> bestMap = result.getBestRuleIdMap();
 
-        for (Map.Entry<BenefitCategory, List<AppliedPromotionResult>> entry : grouped.entrySet()) {
-            BenefitCategory category = entry.getKey();
+        // Group lại theo target
+        Map<PromotionTarget, List<AppliedPromotionResult>> grouped =
+                result.getAppliedResults().stream()
+                        .collect(Collectors.groupingBy(AppliedPromotionResult::getTarget));
+
+        Map<String, List<PromotionSuggestionDTO>> response = new LinkedHashMap<>();
+
+        for (Map.Entry<PromotionTarget, List<AppliedPromotionResult>> entry : grouped.entrySet()) {
+            PromotionTarget target = entry.getKey();
             List<AppliedPromotionResult> list = entry.getValue();
+            List<Long> bestIds = bestMap.getOrDefault(target, List.of());
 
-            List<Long> bestIds = category == BenefitCategory.DISCOUNT ? result.getBestDiscountRuleIds() : List.of();
-
-            List<PromotionSuggestionDTO> suggestionDTOs = list.stream()
+            List<PromotionSuggestionDTO> suggestions = list.stream()
                     .map(r -> PromotionSuggestionDTO.builder()
                             .ruleId(r.getRuleId())
                             .ruleName(r.getRuleName())
@@ -53,9 +58,9 @@ public class PromotionController {
                             .message(r.getMessage())
                             .isBest(bestIds.contains(r.getRuleId()))
                             .build())
-                    .collect(Collectors.toList());
+                    .toList();
 
-            response.put(category.name().toLowerCase(), Map.of("suggestions", suggestionDTOs));
+            response.put(target.name(), suggestions);
         }
 
         return response;

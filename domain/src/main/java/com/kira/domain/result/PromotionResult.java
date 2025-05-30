@@ -1,7 +1,7 @@
 package com.kira.domain.result;
 
 
-import com.kira.domain.model.enums.BenefitCategory;
+import com.kira.domain.model.enums.PromotionTarget;
 import lombok.Builder;
 import lombok.Data;
 
@@ -11,7 +11,7 @@ import java.util.Map;
 @Data
 @Builder
 public class PromotionResult {
-    private Map<BenefitCategory, List<AppliedPromotionResult>> groupedResults;
-    private List<Long> bestDiscountRuleIds;
+    private List<AppliedPromotionResult> appliedResults;
+    private Map<PromotionTarget, List<Long>> bestRuleIdMap;
     private List<RuleResultPair> debugResults;
 }

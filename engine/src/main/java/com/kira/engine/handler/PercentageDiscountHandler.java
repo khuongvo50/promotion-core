@@ -26,8 +26,8 @@ public class PercentageDiscountHandler implements PromotionRuleHandler {
 
         BigDecimal discount = baseAmount.multiply(action.getValue().divide(BigDecimal.valueOf(100)));
 
-        if (action.getMaxDiscount() != null) {
-            discount = discount.min(action.getMaxDiscount());
+        if (action.getMaxDiscount() != null && discount.compareTo(action.getMaxDiscount()) > 0) {
+            discount = action.getMaxDiscount();
         }
 
         return AppliedPromotionResult.builder()

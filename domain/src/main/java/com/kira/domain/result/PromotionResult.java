@@ -1,18 +1,17 @@
 package com.kira.domain.result;
 
 
+import com.kira.domain.model.enums.BenefitCategory;
 import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
+import java.util.Map;
 
 @Data
 @Builder
 public class PromotionResult {
-
-    // Debug / audit — giúp theo dõi rule nào đã chạy như thế nào
-    private List<RuleResultPair> results;
-
-    // Kết quả thực thi thực tế — dùng để apply vào đơn hàng
-    private List<AppliedPromotionResult> appliedResults;
+    private Map<BenefitCategory, List<AppliedPromotionResult>> groupedResults;
+    private List<Long> bestDiscountRuleIds;
+    private List<RuleResultPair> debugResults;
 }

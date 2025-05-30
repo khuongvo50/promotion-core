@@ -3,12 +3,16 @@ package com.kira.engine.core;
 import com.kira.domain.context.PromotionContext;
 import com.kira.domain.model.PromotionAction;
 import com.kira.domain.model.PromotionRule;
+import com.kira.domain.model.enums.BenefitCategory;
 import com.kira.domain.result.AppliedPromotionResult;
 import com.kira.domain.result.PromotionResult;
 import com.kira.domain.result.RuleResultPair;
 import com.kira.domain.result.enums.RuleApplyStatus;
 import com.kira.engine.handler.PromotionRuleHandler;
 import com.kira.engine.handler.PromotionRuleHandlerFactory;
+import com.kira.engine.helper.BenefitCategoryHelper;
+import com.kira.engine.resolver.MaxCashDiscountResolver;
+import com.kira.engine.resolver.PromotionConflictResolver;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.expression.ExpressionParser;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
@@ -16,14 +20,19 @@ import org.springframework.expression.spel.support.StandardEvaluationContext;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class PromotionEngine {
-    private final PromotionRuleHandlerFactory handlerFactory;
     private final ExpressionParser parser = new SpelExpressionParser();
 
-    public PromotionEngine(PromotionRuleHandlerFactory handlerFactory) {
+    private final PromotionRuleHandlerFactory handlerFactory;
+    private final PromotionConflictResolver discountResolver;
+
+    public PromotionEngine(PromotionRuleHandlerFactory handlerFactory,
+                           PromotionConflictResolver discountResolver) {
         this.handlerFactory = handlerFactory;
+        this.discountResolver = discountResolver;
     }
 
     public PromotionResult evaluate(PromotionContext context, List<PromotionRule> rules) {
@@ -58,9 +67,15 @@ public class PromotionEngine {
             }
         }
 
+        Map<BenefitCategory, List<AppliedPromotionResult>> grouped = BenefitCategoryHelper.groupByCategory(appliedResults);
+
+        List<AppliedPromotionResult> discountGroup = grouped.getOrDefault(BenefitCategory.DISCOUNT, List.of());
+        List<Long> bestDiscountRuleIds = discountResolver.resolveBestRuleIds(discountGroup);
+
         return PromotionResult.builder()
-                .results(debugResults)
-                .appliedResults(appliedResults)
+                .groupedResults(grouped)
+                .bestDiscountRuleIds(bestDiscountRuleIds)
+                .debugResults(debugResults)
                 .build();
     }
 }

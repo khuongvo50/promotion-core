@@ -6,8 +6,8 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Data
-public class PromotionApplyRequest {
-    private long customerId;
+public class PromotionEvaluateRequest {
+    private Long customerId;
     private BigDecimal totalAmount;
     private BigDecimal shippingFee;
     private int availablePoints;
@@ -15,8 +15,8 @@ public class PromotionApplyRequest {
 
     @Data
     public static class ItemDTO {
-        private long itemId;
-        private int quantity;
+        private Long itemId;
+        private Integer quantity;
         private BigDecimal price;
     }
 }

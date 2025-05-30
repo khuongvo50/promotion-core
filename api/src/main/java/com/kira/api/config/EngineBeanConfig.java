@@ -3,6 +3,8 @@ package com.kira.api.config;
 import com.kira.engine.core.PromotionEngine;
 import com.kira.engine.handler.PromotionRuleHandler;
 import com.kira.engine.handler.PromotionRuleHandlerFactory;
+import com.kira.engine.resolver.MaxCashDiscountResolver;
+import com.kira.engine.resolver.PromotionConflictResolver;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -17,7 +19,7 @@ public class EngineBeanConfig {
     }
 
     @Bean
-    public PromotionEngine promotionEngine(PromotionRuleHandlerFactory factory) {
-        return new PromotionEngine(factory);
+    public PromotionEngine promotionEngine(PromotionRuleHandlerFactory factory, PromotionConflictResolver discountResolver) {
+        return new PromotionEngine(factory, discountResolver);
     }
 }

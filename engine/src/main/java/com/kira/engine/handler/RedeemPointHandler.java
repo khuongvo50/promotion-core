@@ -7,6 +7,7 @@ import com.kira.domain.model.enums.PromotionType;
 import com.kira.domain.result.AppliedPromotionResult;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class RedeemPointHandler implements PromotionRuleHandler {
 
@@ -20,13 +21,21 @@ public class RedeemPointHandler implements PromotionRuleHandler {
         BigDecimal maxPoint = BigDecimal.valueOf(context.getAvailablePoints());
         BigDecimal cash = maxPoint.multiply(action.getPointToCashRate());
 
+        // Nếu có giới hạn, lấy min giữa tiền tính được và maxDiscount
+        if (action.getMaxDiscount() != null) {
+            cash = cash.min(action.getMaxDiscount());
+        }
+
+        // Tính lại số điểm thực sự được sử dụng (để log message chuẩn hơn nếu cần)
+        BigDecimal pointUsed = cash.divide(action.getPointToCashRate(), 0, RoundingMode.DOWN);
+
         return AppliedPromotionResult.builder()
                 .ruleId(rule.getId())
                 .ruleName(rule.getName())
                 .type(action.getType())
-                .target(null)
+                .target(action.getTarget())
                 .value(cash)
-                .message("Đổi " + maxPoint.intValue() + " điểm thành " + cash + "đ")
+                .message("Đổi " + pointUsed.intValue() + " điểm thành " + cash + "đ")
                 .build();
     }
 }

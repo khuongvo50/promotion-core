@@ -19,7 +19,7 @@ public class RewardPointHandler implements PromotionRuleHandler {
                 .ruleId(rule.getId())
                 .ruleName(rule.getName())
                 .type(action.getType())
-                .target(null) // không áp dụng lên phí hay đơn hàng
+                .target(action.getTarget()) // không áp dụng lên phí hay đơn hàng
                 .value(action.getValue())
                 .message("Tặng " + action.getValue() + " điểm thưởng")
                 .build();
